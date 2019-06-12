@@ -20,23 +20,29 @@ start_user:
 .global systick_handler
 systick_handler:
 	//save lr (EXC_RETURN) to main stack
-	??????
+	push {lr}
 
 	//save r4-r11 to user stack
 	mrs	r0,	psp
 	stmdb	r0!,	{r4-r11}
+	// stmdb stands for store multiple decrease before 
+	// first sub psp before str r4-r11
+	// r0! tells that r0 will be updated after str
+	// which means r0 will be new psp value
+	// to sum up, stmdb acts like push
 
 	//pass psp of curr task by r0 and get psp of the next task
 	bl	sw_task
 	//psp of the next task is now in r0
 
 	//restore r4~r11 from stack of the next task
-	??????
+	ldmia r0!, {r4-r11}
+	// ldmia stands for load multiple increase after
 
 	//modify psp
-	??????
+	msr psp, r0
 
 	//restore lr (EXC_RETURN)
-	??????
+	pop {lr}
 
 	bx	lr
